@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS enterprise_mis;
+USE enterprise_mis;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role ENUM('ADMIN','MANAGER','VIEWER') NOT NULL DEFAULT 'VIEWER',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sales (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  sale_date DATE NOT NULL,
+  customer VARCHAR(150) NOT NULL,
+  amount DECIMAL(14,2) NOT NULL,
+  source VARCHAR(50) DEFAULT 'csv',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_sales_date (sale_date)
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  resource VARCHAR(150),
+  details TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_audit_created_at (created_at)
+);
