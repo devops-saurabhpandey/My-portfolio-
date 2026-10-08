@@ -1,3 +1,88 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Enterprise MIS Dashboard</title><style>body{font-family:Arial,sans-serif;max-width:1000px;margin:40px auto;padding:0 20px;background:#f5f7fb;color:#172033}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}.card{background:white;padding:24px;border-radius:14px;box-shadow:0 4px 16px #0001}.value{font-size:28px;font-weight:700;margin-top:8px}.muted{color:#64748b}</style></head><body>
-  <script>const token=sessionStorage.getItem('mis_access_token'); if(!token){window.location.href='login.html';}</script><h1>Enterprise MIS Dashboard</h1><p class="muted">Portfolio demo dashboard connected to the FastAPI KPI endpoint.</p><div class="grid"><div class="card"><div class="muted">Revenue</div><div id="revenue" class="value">Loading...</div></div><div class="card"><div class="muted">Orders</div><div id="orders" class="value">Loading...</div></div><div class="card"><div class="muted">Customers</div><div id="customers" class="value">Loading...</div></div><div class="card"><div class="muted">Average Order Value</div><div id="aov" class="value">Loading...</div></div></div><script>fetch('/api/v1/kpis').then(r=>r.json()).then(d=>{document.getElementById('revenue').textContent='₹'+d.revenue.toLocaleString('en-IN');document.getElementById('orders').textContent=d.orders.toLocaleString('en-IN');document.getElementById('customers').textContent=d.customers.toLocaleString('en-IN');document.getElementById('aov').textContent='₹'+d.average_order_value.toLocaleString('en-IN')}).catch(()=>document.querySelectorAll('.value').forEach(x=>x.textContent='API unavailable'));</script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enterprise MIS Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f4f6;color:#111827;margin:0}
+header{background:#111827;color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center}
+main{max-width:1100px;margin:30px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:white;padding:20px;border-radius:14px;box-shadow:0 2px 8px #0001}
+.value{font-size:28px;font-weight:700;margin-top:8px}
+section{margin-top:24px}
+button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer}
+#logout{background:#ef4444;color:white}
+#importBtn{background:#2563eb;color:white}
+#message{margin-top:10px}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <strong>Enterprise MIS</strong>
+  <span id="userRole">Loading...</span>
+  <button id="logout">Logout</button>
+</header>
+<main>
+  <h1>Business Analytics Dashboard</h1>
+  <div class="grid">
+    <div class="card">Revenue<div class="value" id="revenue">—</div></div>
+    <div class="card">Orders<div class="value" id="orders">—</div></div>
+    <div class="card">Customers<div class="value" id="customers">—</div></div>
+    <div class="card">Avg. Order Value<div class="value" id="aov">—</div></div>
+  </div>
+  <section class="card">
+    <h2>Sales CSV Import</h2>
+    <p>Admin and Manager roles can import validated sales data.</p>
+    <input id="csvFile" type="file" accept=".csv">
+    <button id="importBtn">Import CSV</button>
+    <div id="message"></div>
+  </section>
+</main>
+<script>
+const token=sessionStorage.getItem('mis_access_token');
+if(!token) window.location.href='login.html';
+
+async function api(path,options={}){
+  options.headers={...(options.headers||{}),Authorization:'Bearer '+token};
+  const res=await fetch(path,options);
+  if(res.status===401){sessionStorage.removeItem('mis_access_token');window.location.href='login.html';}
+  return res;
+}
+
+async function loadDashboard(){
+  const me=await api('/api/v1/me');
+  const user=await me.json();
+  document.getElementById('userRole').textContent=user.username+' • '+user.role;
+
+  const res=await api('/api/v1/kpis');
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.detail||'Unable to load KPIs');
+  document.getElementById('revenue').textContent='₹'+Number(data.revenue).toLocaleString();
+  document.getElementById('orders').textContent=data.orders;
+  document.getElementById('customers').textContent=data.customers;
+  document.getElementById('aov').textContent='₹'+Number(data.average_order_value).toLocaleString(undefined,{maximumFractionDigits:2});
+}
+
+document.getElementById('importBtn').addEventListener('click',async()=>{
+  const file=document.getElementById('csvFile').files[0];
+  const message=document.getElementById('message');
+  if(!file){message.textContent='Please select a CSV file.';return;}
+  const form=new FormData(); form.append('file',file);
+  const res=await api('/api/v1/sales/import',{method:'POST',body:form});
+  const data=await res.json();
+  message.textContent=res.ok?'Imported '+data.rows_imported+' rows successfully.':(data.detail||'Import failed');
+  if(res.ok) loadDashboard();
+});
+
+document.getElementById('logout').addEventListener('click',()=>{
+  sessionStorage.removeItem('mis_access_token');
+  window.location.href='login.html';
+});
+
+loadDashboard().catch(err=>document.getElementById('message').textContent=err.message);
+</script>
+</body>
+</html>
