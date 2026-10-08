@@ -130,14 +130,22 @@ def me(user: Annotated[dict, Depends(current_user)]):
 
 
 @app.get("/api/v1/kpis")
-def kpis(user: Annotated[dict, Depends(require_roles("ADMIN", "MANAGER", "VIEWER"))]):
+def kpis(user: Annotated[dict, Depends(require_roles("ADMIN", "MANAGER", "VIEWER"))], start_date: str | None = None, end_date: str | None = None):
     connection = db_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT COALESCE(SUM(amount), 0) AS revenue, COUNT(*) AS orders, "
-                "COUNT(DISTINCT customer) AS customers FROM sales"
-            )
+            query = "SELECT COALESCE(SUM(amount), 0) AS revenue, COUNT(*) AS orders, COUNT(DISTINCT customer) AS customers FROM sales"
+            params = []
+            filters = []
+            if start_date:
+                filters.append("sale_date >= %s")
+                params.append(start_date)
+            if end_date:
+                filters.append("sale_date <= %s")
+                params.append(end_date)
+            if filters:
+                query += " WHERE " + " AND ".join(filters)
+            cursor.execute(query, params)
             row = cursor.fetchone()
     finally:
         connection.close()
@@ -212,6 +220,34 @@ def audit_logs(user: Annotated[dict, Depends(require_roles("ADMIN"))]):
     finally:
         connection.close()
     return {"count": len(rows), "items": rows}
+
+
+@app.get("/api/v1/analytics/daily")
+def daily_analytics(
+    user: Annotated[dict, Depends(require_roles("ADMIN", "MANAGER", "VIEWER"))],
+    start_date: str | None = None,
+    end_date: str | None = None,
+):
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            query = "SELECT sale_date, COALESCE(SUM(amount),0) AS revenue, COUNT(*) AS orders FROM sales"
+            params = []
+            filters = []
+            if start_date:
+                filters.append("sale_date >= %s")
+                params.append(start_date)
+            if end_date:
+                filters.append("sale_date <= %s")
+                params.append(end_date)
+            if filters:
+                query += " WHERE " + " AND ".join(filters)
+            query += " GROUP BY sale_date ORDER BY sale_date"
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+    finally:
+        connection.close()
+    return {"items": rows}
 
 
 @app.get("/api/v1/sales")
