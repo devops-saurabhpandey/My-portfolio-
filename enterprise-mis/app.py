@@ -2,7 +2,7 @@ import os
 from csv import DictReader
 from datetime import datetime, timedelta, timezone
 from io import StringIO
-from typing import Annotated
+from typing import Annotated, Optional
 
 import pymysql
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
@@ -212,6 +212,37 @@ def audit_logs(user: Annotated[dict, Depends(require_roles("ADMIN"))]):
     finally:
         connection.close()
     return {"count": len(rows), "items": rows}
+
+
+@app.get("/api/v1/sales")
+def sales_list(
+    user: Annotated[dict, Depends(require_roles("ADMIN", "MANAGER", "VIEWER"))],
+    search: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+):
+    limit = min(max(limit, 1), 100)
+    offset = max(offset, 0)
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            if search:
+                pattern = "%" + search + "%"
+                cursor.execute(
+                    "SELECT id, sale_date, customer, amount, source, created_at "
+                    "FROM sales WHERE customer LIKE %s ORDER BY sale_date DESC, id DESC LIMIT %s OFFSET %s",
+                    (pattern, limit, offset),
+                )
+            else:
+                cursor.execute(
+                    "SELECT id, sale_date, customer, amount, source, created_at "
+                    "FROM sales ORDER BY sale_date DESC, id DESC LIMIT %s OFFSET %s",
+                    (limit, offset),
+                )
+            rows = cursor.fetchall()
+    finally:
+        connection.close()
+    return {"count": len(rows), "limit": limit, "offset": offset, "items": rows}
 
 
 @app.get("/api/v1/roles")
