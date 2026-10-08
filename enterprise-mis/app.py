@@ -8,8 +8,9 @@ import pymysql
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+from passlib.context import CryptContext
 
-app = FastAPI(title="Enterprise MIS & Analytics API", version="1.3.0")
+app = FastAPI(title="Enterprise MIS & Analytics API", version="1.4.0")
 
 SECRET_KEY = os.getenv("MIS_SECRET_KEY", "development-only-change-me")
 ALGORITHM = "HS256"
@@ -26,13 +27,8 @@ DATABASE_CONFIG = {
 }
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ROLES = {"ADMIN", "MANAGER", "VIEWER"}
-
-DEMO_USERS = {
-    "admin": {"password": "admin-demo", "role": "ADMIN"},
-    "manager": {"password": "manager-demo", "role": "MANAGER"},
-    "viewer": {"password": "viewer-demo", "role": "VIEWER"},
-}
 
 
 def db_connection():
@@ -42,9 +38,26 @@ def db_connection():
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
 
+def verify_password(plain_password: str, password_hash: str) -> bool:
+    return pwd_context.verify(plain_password, password_hash)
+
+
 def create_access_token(username: str, role: str):
     expires = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     return jwt.encode({"sub": username, "role": role, "exp": expires}, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def get_user(username: str):
+    connection = db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, username, password_hash, role FROM users WHERE username=%s",
+                (username,),
+            )
+            return cursor.fetchone()
+    finally:
+        connection.close()
 
 
 def current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -59,7 +72,10 @@ def current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         role = payload.get("role")
         if not username or role not in ROLES:
             raise credentials_error
-        return {"username": username, "role": role}
+        user = get_user(username)
+        if not user or user["role"] != role:
+            raise credentials_error
+        return {"id": user["id"], "username": user["username"], "role": user["role"]}
     except JWTError:
         raise credentials_error
 
@@ -91,19 +107,20 @@ def health():
 
 @app.post("/api/v1/auth/login")
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user = DEMO_USERS.get(form.username)
-    if not user or user["password"] != form.password:
+    user = get_user(form.username)
+    if not user or not verify_password(form.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Incorrect username or password")
-    token = create_access_token(form.username, user["role"])
+
+    token = create_access_token(user["username"], user["role"])
     try:
-        write_audit(form.username, "LOGIN", "auth", "Successful demo login")
+        write_audit(user["username"], "LOGIN", "auth", "Successful login")
     except HTTPException:
         pass
+
     return {
         "access_token": token,
         "token_type": "bearer",
         "role": user["role"],
-        "demo_only": True,
     }
 
 
@@ -168,7 +185,6 @@ async def import_sales(
                     if not customer or amount < 0:
                         raise ValueError
                 except (TypeError, ValueError):
-                    connection.rollback()
                     raise HTTPException(status_code=400, detail="Invalid sales row")
 
                 cursor.execute(
