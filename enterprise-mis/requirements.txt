@@ -4,3 +4,4 @@ pytest
 httpx
 python-multipart
 pymysql
+python-jose[cryptography]
