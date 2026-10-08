@@ -1,13 +1,24 @@
-# Saurabh Pandey — Portfolio
+# Saurabh Pandey — Interview Portfolio
 
-Personal portfolio website for Saurabh Pandey and Shivasha.
+Professional portfolio for **Saurabh Pandey / Shivasha**, focused on web development, MIS, automation and practical software projects.
 
-## Included
-- Responsive single-page portfolio
-- About, skills, projects and contact sections
-- Professional portrait
-- Mobile-friendly dark UI
-- GitHub project links
+## Portfolio sections
+- Professional introduction
+- Technical skills
+- Experience
+- Featured projects
+- Education
+- Why work with me
+- GitHub/contact links
+- Responsive mobile-first layout
+
+## Featured projects
+1. **Shivasha Earning App Calculator** — business calculation and commission/refund logic.
+2. **EOSS Sadhna** — spiritual social-app concept under Shivasha.
+3. **MIS & Automation** — reporting, data handling and workflow automation.
+
+## Technology
+HTML, CSS, JavaScript, Python concepts, Git/GitHub, Excel/MIS, MySQL/MongoDB/Firebase concepts, Docker/GCP/CI-CD learning.
 
 ## GitHub Pages
-This repository is a static HTML/CSS/JS site and can be published with GitHub Pages from the main branch.
+This is a static HTML/CSS/JS site. It can be deployed through GitHub Pages using the repository's `main` branch or a GitHub Actions Pages workflow.
