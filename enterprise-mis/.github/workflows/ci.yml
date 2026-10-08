@@ -1,0 +1,23 @@
+name: Enterprise MIS CI
+
+on:
+  push:
+    paths:
+      - 'enterprise-mis/**'
+  pull_request:
+    paths:
+      - 'enterprise-mis/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enterprise-mis
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: pytest -q
