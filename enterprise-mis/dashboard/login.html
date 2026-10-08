@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Enterprise MIS Login</title>
+  <style>body{font-family:Arial,sans-serif;background:#111827;color:#fff;display:grid;place-items:center;min-height:100vh;margin:0}.card{width:min(380px,90%);background:#1f2937;padding:28px;border-radius:16px}input,button{width:100%;box-sizing:border-box;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #4b5563}button{cursor:pointer;font-weight:700}.error{color:#fca5a5}</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Enterprise MIS</h1>
+    <p>Secure dashboard login</p>
+    <form id="loginForm">
+      <input name="username" placeholder="Username" required>
+      <input name="password" type="password" placeholder="Password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <p id="message" class="error"></p>
+  </main>
+  <script>
+    const form=document.getElementById('loginForm');
+    const message=document.getElementById('message');
+    form.addEventListener('submit',async(e)=>{
+      e.preventDefault(); message.textContent='';
+      const body=new URLSearchParams(new FormData(form));
+      try{
+        const res=await fetch('/api/v1/auth/login',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+        const data=await res.json();
+        if(!res.ok) throw new Error(data.detail||'Login failed');
+        sessionStorage.setItem('mis_access_token',data.access_token);
+        window.location.href='index.html';
+      }catch(err){message.textContent=err.message;}
+    });
+  </script>
+</body>
+</html>
