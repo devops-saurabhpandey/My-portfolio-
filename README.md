@@ -26,6 +26,17 @@ A customer and lead management project focused on task assignment, follow-ups, m
 A reusable self-hosted infrastructure project intended to host multiple applications and reduce recurring hosting costs.
 - Repository: https://github.com/devops-saurabhpandey/github-server-platform
 
+### 5. SHIVASHA AI Prompt Library
+A prompt discovery and management platform integrated into the SHIVASHA app, with a separately buildable website. The merged implementation includes prompt categories, search, favourites, collections, submissions, moderation, ratings and reports.
+- Repository: https://github.com/devops-saurabhpandey/shivasha
+- Merged implementation: https://github.com/devops-saurabhpandey/shivasha/pull/68
+- Status: implementation merged; production rollout, database seeding and provider configuration remain to be completed.
+
+### 6. Shivasha Global Projects & Leads
+An international projects and lead-discovery module being developed inside the existing SHIVASHA main app, not as a separate app. Planned coverage includes the USA, UK, Australia, Canada, UAE, Germany, Singapore and other markets, across multiple industries.
+- Repository: https://github.com/devops-saurabhpandey/shivasha
+- Status: in development; project discovery and authorized-source integration are being built.
+
 ## Portfolio contents
 
 - Professional introduction and experience
