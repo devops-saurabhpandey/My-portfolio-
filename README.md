@@ -49,6 +49,12 @@ An international projects and lead-discovery module being developed inside the e
 
 HTML, CSS, JavaScript, React, Node.js, Express, MongoDB, Git/GitHub, Excel/MIS, Docker, Docker Compose and Linux.
 
+## Contact
+
+- Email: saurabh9pan@gmail.com
+- WhatsApp: +91 73929 16676 — https://wa.me/917392916676
+- WhatsApp: +91 63876 50085 — https://wa.me/916387650085
+
 ## Run locally
 
 This portfolio is a static website. Open `index.html` in a browser, or serve this folder with any static web server.
