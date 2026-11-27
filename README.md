@@ -32,7 +32,17 @@ A prompt discovery and management platform integrated into the SHIVASHA app, wit
 - Merged implementation: https://github.com/devops-saurabhpandey/shivasha/pull/68
 - Status: implementation merged; production rollout, database seeding and provider configuration remain to be completed.
 
-### 6. Shivasha Global Projects & Leads
+### 6. Shivasha Global AI Marketplace
+A unified marketplace roadmap inside the existing Shivasha app, covering AI services, web/software, global projects, business directory, freelancers, education, finance and e-commerce.
+- Repository: https://github.com/devops-saurabhpandey/shivasha
+- Status: roadmap / in development; not presented as a completed production marketplace.
+
+### 7. Enterprise MIS & Analytics Platform
+A portfolio case study for business dashboards, KPI reporting, data import/export, analytics and operational workflows using sample data.
+- Repository: https://github.com/devops-saurabhpandey/My-portfolio-
+- Status: in development; demonstrative case study, not an official enterprise client project.
+
+### 8. Shivasha Global Projects & Leads
 An international projects and lead-discovery module being developed inside the existing SHIVASHA main app, not as a separate app. Planned coverage includes the USA, UK, Australia, Canada, UAE, Germany, Singapore and other markets, across multiple industries.
 - Repository: https://github.com/devops-saurabhpandey/shivasha
 - Status: in development; project discovery and authorized-source integration are being built.
@@ -43,7 +53,16 @@ An international projects and lead-discovery module being developed inside the e
 - Technical skills and tools
 - Current projects and repository links
 - Education and contact information
+- Resume download: `Saurabh_Pandey_ATS_Resume_Updated.pdf`
 - Responsive mobile-friendly layout
+
+## Education
+
+- PGDCA, Prayagdas Tomar Education Pvt. Ltd. (2021–2022) — 86.50%
+- D.El.Ed., NIOS (2017–2019) — 77.71%
+- Bachelor of Arts, CSJM University, Kanpur (2008–2010) — 53%
+- Intermediate, Allahabad Board — 61%
+- High School, Allahabad Board — 59%
 
 ## Technologies and learning areas
 
